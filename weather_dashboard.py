@@ -4,20 +4,19 @@ import pandas as pd
 from datetime import datetime
 
 def get_coordinates(city_name):
-    url = f"https://nominatim.openstreetmap.org/search?q={city_name}&format=json&limit=1"
-    headers = {"User-Agent": "WeatherDashboard/1.0 (contact@example.com)"}
-    response = requests.get(url, headers=headers)
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={city_name}&count=1"
+    response = requests.get(url)
 
     if response.status_code == 200:
-        location_data = response.json()
-        if location_data:
-            location = location_data[0]
-            return float(location['lat']), float(location['lon'])
+        results = response.json().get("results")
+        if results:
+            location = results[0]
+            return float(location['latitude']), float(location['longitude'])
         else:
             st.warning("City not found. Try adding the country name (e.g., 'Delhi, India').")
             return None, None
     else:
-        st.error(f"API request failed with status code {response.status_code}: {response.text}")
+        st.error(f"Geocoding API failed with status code {response.status_code}")
         return None, None
 
 def get_weather_data(lat, lon):
